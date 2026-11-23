@@ -1,0 +1,63 @@
+{% extends "elections/base.html" %}
+{% block title %}Add New Result{% endblock %}
+
+{% block content %}
+<h1>Add a New Polling Unit Result</h1>
+<p class="lead">Enter the polling unit and a score for <strong>every</strong> party (use 0 if a party got no votes).</p>
+
+{% if form.errors %}
+  <div class="alert alert-error" role="alert">Please fix the highlighted problems below. Nothing has been saved.</div>
+{% endif %}
+
+<form method="post" class="card" novalidate>
+  {% csrf_token %}
+
+  <h2>1. Where is the polling unit?</h2>
+  <div class="field">
+    <label for="{{ form.lga.id_for_label }}">{{ form.lga.label }}</label>
+    <!-- Choosing an LGA loads its wards through /api/wards/ -->
+    <select id="lga" name="lga" required data-target="#ward" data-url="{% url 'api_wards' %}" data-param="lga">
+      <option value="">-- Select LGA --</option>
+      {% for lga in form.lga.field.queryset %}
+        <option value="{{ lga.lga_id }}" {% if form.lga.value|stringformat:"s" == lga.lga_id|stringformat:"s" %}selected{% endif %}>{{ lga.lga_name }}</option>
+      {% endfor %}
+    </select>
+    {% for e in form.lga.errors %}<p class="error">{{ e }}</p>{% endfor %}
+  </div>
+
+  <div class="field">
+    <label for="ward">{{ form.ward.label }}</label>
+    <select id="ward" name="ward" required disabled data-placeholder="-- Select ward --"
+            data-selected="{{ form.ward.value|default:'' }}">
+      <option value="">-- Select LGA first --</option>
+    </select>
+    {% for e in form.ward.errors %}<p class="error">{{ e }}</p>{% endfor %}
+  </div>
+
+  <h2>2. Polling unit details</h2>
+  <div class="field">
+    <label for="{{ form.polling_unit_name.id_for_label }}">{{ form.polling_unit_name.label }}</label>
+    {{ form.polling_unit_name }}
+    {% for e in form.polling_unit_name.errors %}<p class="error">{{ e }}</p>{% endfor %}
+  </div>
+  <div class="field">
+    <label for="{{ form.polling_unit_number.id_for_label }}">{{ form.polling_unit_number.label }}</label>
+    {{ form.polling_unit_number }}
+    {% for e in form.polling_unit_number.errors %}<p class="error">{{ e }}</p>{% endfor %}
+  </div>
+
+  <h2>3. Party scores</h2>
+  <div class="score-grid">
+    <!-- One number box per row in the party table -->
+    {% for field in form.score_fields %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <button type="submit" class="btn">Save result</button>
+</form>
+{% endblock %}

@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+venv/
+
+# Generated database (rebuild it with: python import_mysql_dump.py)
+db.sqlite3
+*.sqlite3
+
+# Django collectstatic output
+staticfiles/
+
+# Local settings / secrets
+.env
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code local files
+.claude/
+
+# Browser-test output
+.playwright-mcp/
+*.png

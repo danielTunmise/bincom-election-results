@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Election Results{% endblock %} · Delta State 2011</title>
+  <link rel="stylesheet" href="{% static 'elections/style.css' %}">
+</head>
+<body>
+  <!-- Navigation bar: one link per page; the current page is highlighted -->
+  <nav class="navbar">
+    <span class="brand">Delta State 2011 Results</span>
+    <a href="{% url 'polling_unit_result' %}" class="{% if request.resolver_match.url_name == 'polling_unit_result' %}active{% endif %}">Polling Unit Result</a>
+    <a href="{% url 'lga_total' %}" class="{% if request.resolver_match.url_name == 'lga_total' %}active{% endif %}">LGA Total</a>
+    <a href="{% url 'add_polling_unit' %}" class="{% if request.resolver_match.url_name == 'add_polling_unit' %}active{% endif %}">Add New Result</a>
+  </nav>
+
+  <main class="container">
+    <!-- Flash messages (e.g. the success banner after saving) -->
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}" role="status">{{ message }}</div>
+    {% endfor %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{% static 'elections/chained-dropdowns.js' %}"></script>
+</body>
+</html>

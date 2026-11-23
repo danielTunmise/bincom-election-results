@@ -1,0 +1,71 @@
+{% extends "elections/base.html" %}
+{% block title %}Polling Unit Result{% endblock %}
+
+{% block content %}
+<h1>Polling Unit Result</h1>
+<p class="lead">Choose an LGA, then a ward, then a polling unit to see its party scores.</p>
+
+<!--
+  Chained dropdowns: each <select> with data-target loads the options of the
+  next <select> from a JSON endpoint (see static/elections/chained-dropdowns.js).
+  data-selected restores the previous choice after the page reloads with results.
+-->
+<form method="get" class="card">
+  <div class="field">
+    <label for="lga">Local Government Area (LGA)</label>
+    <select id="lga" required data-target="#ward" data-url="{% url 'api_wards' %}" data-param="lga">
+      <option value="">-- Select LGA --</option>
+      {% for lga in lgas %}
+        <option value="{{ lga.lga_id }}" {% if lga.lga_id == selected_lga %}selected{% endif %}>{{ lga.lga_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="ward">Ward</label>
+    <select id="ward" required disabled data-target="#polling_unit" data-url="{% url 'api_polling_units' %}" data-param="ward"
+            data-placeholder="-- Select ward --" data-selected="{{ selected_ward|default:'' }}">
+      <option value="">-- Select LGA first --</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="polling_unit">Polling unit</label>
+    <select id="polling_unit" name="polling_unit" required disabled
+            data-placeholder="-- Select polling unit --" data-selected="{{ selected_unit|default:'' }}">
+      <option value="">-- Select ward first --</option>
+    </select>
+  </div>
+
+  <button type="submit" class="btn">Show result</button>
+</form>
+
+{% if unit %}
+  <section class="card">
+    <h2>{{ unit.polling_unit_name|default:"Unnamed polling unit" }}</h2>
+    <p class="muted">
+      {% if unit.polling_unit_number %}Number: <strong>{{ unit.polling_unit_number }}</strong> · {% endif %}
+      Ward: <strong>{{ unit.ward.ward_name }}</strong> · LGA: <strong>{{ unit.ward.lga.lga_name }}</strong>
+    </p>
+
+    {% if rows %}
+      <table>
+        <thead><tr><th>Party</th><th class="num">Score</th></tr></thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td>{{ row.party }}</td>
+              <td class="num">{{ row.score }}
+                {% if row.entries > 1 %}<span class="note" title="The data holds {{ row.entries }} rows for this party at this unit; they are added together.">({{ row.entries }} entries added)</span>{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot><tr><th>Total votes</th><th class="num">{{ grand_total }}</th></tr></tfoot>
+      </table>
+    {% else %}
+      <div class="empty">No results have been recorded for this polling unit yet.</div>
+    {% endif %}
+  </section>
+{% endif %}
+{% endblock %}

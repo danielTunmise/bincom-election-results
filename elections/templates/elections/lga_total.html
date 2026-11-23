@@ -1,0 +1,60 @@
+{% extends "elections/base.html" %}
+{% block title %}LGA Total{% endblock %}
+
+{% block content %}
+<h1>LGA Total</h1>
+<p class="lead">The summed result of <strong>all polling units</strong> in an LGA.</p>
+
+<form method="get" class="card">
+  <div class="field">
+    <label for="lga">Local Government Area (LGA)</label>
+    <select id="lga" name="lga" required>
+      <option value="">-- Select LGA --</option>
+      {% for l in lgas %}
+        <option value="{{ l.lga_id }}" {% if l.lga_id == selected_lga %}selected{% endif %}>{{ l.lga_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn">Show total</button>
+</form>
+
+{% if lga %}
+  <section class="card">
+    <h2>{{ lga.lga_name }}</h2>
+    <p class="muted">
+      {{ units_with_results }} of {{ units_total }} polling unit{{ units_total|pluralize }} in this LGA have recorded results.
+    </p>
+
+    {% if units_with_results == 0 %}
+      <div class="empty">No polling unit results have been recorded for this LGA, so every total below is 0.</div>
+    {% endif %}
+
+    <table>
+      <thead>
+        <tr>
+          <th>Party</th>
+          <th class="num">Sum of polling unit results<br><span class="note">(calculated)</span></th>
+          <th class="num compare">Announced LGA result<br><span class="note">(for comparison only)</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            <td>{{ row.party }}</td>
+            <td class="num">{{ row.total }}</td>
+            <td class="num compare">{% if row.announced is None %}&ndash;{% else %}{{ row.announced }}{% endif %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th>Total votes</th>
+          <th class="num">{{ grand_total }}</th>
+          <th class="num compare">{% if has_announced %}{{ announced_total }}{% else %}&ndash;{% endif %}</th>
+        </tr>
+      </tfoot>
+    </table>
+    <p class="note">The grey column is read from the separate <code>announced_lga_results</code> table. The totals in the first column are not taken from it.</p>
+  </section>
+{% endif %}
+{% endblock %}
